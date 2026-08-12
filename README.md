@@ -1,12 +1,5 @@
 # react-image-zoom-lightbox
 
-[![npm version](https://img.shields.io/npm/v/react-image-zoom-lightbox.svg?style=flat-square&color=blue)](https://www.npmjs.com/package/react-image-zoom-lightbox)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/react-image-zoom-lightbox?style=flat-square&color=green)](https://bundlephobia.com/package/react-image-zoom-lightbox)
-[![license](https://img.shields.io/npm/l/react-image-zoom-lightbox.svg?style=flat-square&color=orange)](https://github.com/mhrafi21/react-image-zoom-lightbox/blob/main/LICENSE)
-[![npm downloads](https://img.shields.io/npm/dm/react-image-zoom-lightbox.svg?style=flat-square&color=purple)](https://www.npmjs.com/package/react-image-zoom-lightbox)
-
-# react-image-zoom-lightbox
-
 [![npm version](https://img.shields.io/npm/v/react-image-zoom-lightbox.svg?style=flat-square\&color=blue)](https://www.npmjs.com/package/react-image-zoom-lightbox)
 [![npm downloads](https://img.shields.io/npm/dm/react-image-zoom-lightbox.svg?style=flat-square\&color=green)](https://www.npmjs.com/package/react-image-zoom-lightbox)
 [![license](https://img.shields.io/npm/l/react-image-zoom-lightbox.svg?style=flat-square)](https://github.com/mhrafi21/react-image-zoom-lightbox/blob/main/LICENSE)

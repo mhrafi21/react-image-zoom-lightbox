@@ -1,4 +1,4 @@
-import "./styles.css";
+
 
 export { ImageZoomModal } from "./ImageZoomModal";
 export type { ImageZoomModalProps } from "./ImageZoomModal";

@@ -1,6 +1,6 @@
 {
   "name": "react-image-zoom-lightbox",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Zero-dependency, zero-config image zoom lightbox modal for React & TypeScript.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
