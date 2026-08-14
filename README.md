@@ -20,7 +20,7 @@ A lightweight, zero-dependency, zero-configuration image zoom and lightbox compo
 * ⌨️ **Keyboard Support** — Close the lightbox using the `Escape` key.
 * 🎨 **Custom Icons** — Replace built-in SVG icons with your own React components.
 * 🎯 **TypeScript Support** — Fully typed API for a better developer experience.
-* 🎨 **Styling Friendly** — Works with Tailwind CSS, CSS Modules, Styled Components, or regular CSS.
+* 🎨 **Styling Friendly** — Works with regular CSS, CSS Modules, Styled Components, or any React styling approach.
 * ⚡ **Lightweight** — Focused on essential image zoom functionality without unnecessary dependencies.
 
 ---
@@ -106,29 +106,11 @@ That's it. No additional configuration is required.
 
 ---
 
-## 🎨 Tailwind CSS Support
+## 🎨 Custom CSS Styling
 
-The package works with Tailwind CSS.
+This package ships with its own custom CSS and does not require Tailwind CSS.
 
-If your Tailwind configuration scans files inside `node_modules`, include the package distribution files in your content configuration.
-
-### Tailwind CSS v3
-
-```js
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/react-image-zoom-lightbox/dist/**/*.{js,mjs}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-};
-```
-
-If your project does not use Tailwind CSS, no additional configuration is required.
+If you want to customize the look further, you can override the class names in the bundled stylesheet or add your own CSS classes with a higher specificity.
 
 ---
 

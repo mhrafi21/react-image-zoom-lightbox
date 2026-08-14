@@ -1,6 +1,29 @@
-// src/ImageZoomModal.tsx
 import React, { useState, useEffect, useCallback } from "react";
+import "./styles.css";
 import { ZoomInIcon, ZoomOutIcon, RotateCcwIcon, CloseIcon } from "./Icons";
+
+const clampScale = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
+
+const getClientPoint = (
+  event: React.MouseEvent<any> | React.TouchEvent<any>
+) => {
+  if ("touches" in event && event.touches.length > 0) {
+    return {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
+  }
+
+  if ("clientX" in event && "clientY" in event) {
+    return {
+      x: event.clientX,
+      y: event.clientY,
+    };
+  }
+
+  return { x: 0, y: 0 };
+};
 
 export interface ImageZoomModalProps {
   isOpen: boolean;
@@ -49,42 +72,75 @@ export const ImageZoomModal: React.FC<ImageZoomModalProps> = ({
   }, [onClose, resetState]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+    if (!isOpen) return;
+    resetState();
+  }, [isOpen, src, resetState]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isOpen) {
         handleClose();
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, handleClose]);
 
-  const handleZoomIn = () => {
-    setZoomScale((prev) => Math.min(prev + step, maxScale));
-  };
-
-  const handleZoomOut = () => {
+  const handleZoomIn = useCallback(() => {
     setZoomScale((prev) => {
-      const next = Math.max(prev - step, minScale);
-      if (next === 1) setPosition({ x: 0, y: 0 });
+      const next = clampScale(prev + step, minScale, maxScale);
+      if (next <= minScale) {
+        setPosition({ x: 0, y: 0 });
+      }
       return next;
+    });
+  }, [maxScale, minScale, step]);
+
+  const handleZoomOut = useCallback(() => {
+    setZoomScale((prev) => {
+      const next = clampScale(prev - step, minScale, maxScale);
+      if (next === minScale) {
+        setPosition({ x: 0, y: 0 });
+      }
+      return next;
+    });
+  }, [maxScale, minScale, step]);
+
+  const handleWheelZoom = useCallback(
+    (event: React.WheelEvent<HTMLDivElement>) => {
+      event.preventDefault();
+
+      const delta = event.deltaY < 0 ? step : -step;
+      setZoomScale((prev) => {
+        const next = clampScale(prev + delta, minScale, maxScale);
+        if (next === minScale) {
+          setPosition({ x: 0, y: 0 });
+        }
+        return next;
+      });
+    },
+    [maxScale, minScale, step]
+  );
+
+  const handleMouseDown = (event: React.MouseEvent<any> | React.TouchEvent<any>) => {
+    if (zoomScale <= minScale) return;
+
+    setIsDragging(true);
+    const point = getClientPoint(event);
+    setStartPos({
+      x: point.x - position.x,
+      y: point.y - position.y,
     });
   };
 
-  const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
-    if (zoomScale <= 1) return;
-    setIsDragging(true);
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-    setStartPos({ x: clientX - position.x, y: clientY - position.y });
-  };
+  const handleMouseMove = (event: React.MouseEvent<any> | React.TouchEvent<any>) => {
+    if (!isDragging || zoomScale <= minScale) return;
 
-  const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging || zoomScale <= 1) return;
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    const point = getClientPoint(event);
     setPosition({
-      x: clientX - startPos.x,
-      y: clientY - startPos.y,
+      x: point.x - startPos.x,
+      y: point.y - startPos.y,
     });
   };
 
@@ -95,17 +151,15 @@ export const ImageZoomModal: React.FC<ImageZoomModalProps> = ({
   if (!isOpen || !src) return null;
 
   return (
-    <div
-      className={`fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-2 sm:p-4 select-none touch-none ${className}`}
-    >
-      {/* Controls Bar */}
-      <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
+    <div className={`image-zoom-modal ${className}`.trim()} role="dialog" aria-modal="true">
+      <div className="image-zoom-toolbar">
         <button
           type="button"
           onClick={handleZoomIn}
           disabled={zoomScale >= maxScale}
-          className="bg-white/10 hover:bg-white/25 disabled:opacity-40 text-white p-3 rounded-full backdrop-blur-md transition-all duration-200 flex items-center justify-center"
+          className="image-zoom-button"
           title="Zoom In"
+          aria-label="Zoom in"
         >
           {zoomInIcon || <ZoomInIcon size={20} />}
         </button>
@@ -113,43 +167,47 @@ export const ImageZoomModal: React.FC<ImageZoomModalProps> = ({
           type="button"
           onClick={handleZoomOut}
           disabled={zoomScale <= minScale}
-          className="bg-white/10 hover:bg-white/25 disabled:opacity-40 text-white p-3 rounded-full backdrop-blur-md transition-all duration-200 flex items-center justify-center"
+          className="image-zoom-button"
           title="Zoom Out"
+          aria-label="Zoom out"
         >
           {zoomOutIcon || <ZoomOutIcon size={20} />}
         </button>
         <button
           type="button"
           onClick={resetState}
-          className="bg-white/10 hover:bg-white/25 text-white p-3 rounded-full backdrop-blur-md transition-all duration-200 flex items-center justify-center"
+          className="image-zoom-button"
           title="Reset Zoom"
+          aria-label="Reset zoom"
         >
           {resetIcon || <RotateCcwIcon size={20} />}
         </button>
         <button
           type="button"
           onClick={handleClose}
-          className="bg-white/20 hover:bg-red-500 text-white p-3 rounded-full backdrop-blur-md transition-all duration-200 ml-2 shadow-lg flex items-center justify-center"
+          className="image-zoom-button image-zoom-button--close"
           title="Close"
+          aria-label="Close dialog"
         >
           {closeIcon || <CloseIcon size={24} />}
         </button>
       </div>
 
-      {/* Image Viewport */}
       <div
-        className="w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing"
+        className={isDragging ? "image-zoom-viewport is-dragging" : "image-zoom-viewport"}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
         onTouchStart={handleMouseDown}
         onTouchMove={handleMouseMove}
         onTouchEnd={handleMouseUp}
+        onWheel={handleWheelZoom}
       >
         <img
           src={src}
           alt={alt}
-          className="max-w-full max-h-[90vh] object-contain transition-transform duration-100 ease-out rounded-lg shadow-2xl pointer-events-none"
+          className="image-zoom-image"
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${zoomScale})`,
           }}
